@@ -1,0 +1,10 @@
+node_modules
+dist
+.wrangler
+*.local
+.env
+.env.*
+!.env.example
+.dev.vars
+wrangler.toml
+.DS_Store

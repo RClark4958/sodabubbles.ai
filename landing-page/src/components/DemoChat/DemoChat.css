@@ -1,0 +1,199 @@
+.demo-chat {
+  margin-top: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.demo-chat__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.demo-chat__title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.demo-chat__label {
+  font-size: 0.65rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.demo-chat__messages {
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 320px;
+  overflow-y: auto;
+  min-height: 80px;
+}
+
+.demo-chat__messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.demo-chat__messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.demo-chat__messages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+}
+
+/* Messages */
+.demo-chat__msg {
+  display: flex;
+  flex-direction: column;
+  animation: demo-chat-fadein 0.3s ease;
+}
+
+.demo-chat__msg--user {
+  align-items: flex-end;
+}
+
+.demo-chat__msg--assistant {
+  align-items: flex-start;
+}
+
+@keyframes demo-chat-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Bubbles */
+.demo-chat__bubble {
+  max-width: 85%;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  border-radius: 10px;
+  word-break: break-word;
+}
+
+.demo-chat__msg--user .demo-chat__bubble {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: #e2e8f0;
+  border-bottom-right-radius: 3px;
+}
+
+.demo-chat__msg--assistant .demo-chat__bubble {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+  border-bottom-left-radius: 3px;
+}
+
+/* Typing indicator */
+.demo-chat__typing {
+  display: inline-flex;
+  gap: 0.2rem;
+  padding: 0.5rem 0.7rem;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  border-bottom-left-radius: 3px;
+}
+
+.demo-chat__typing span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #94a3b8;
+  animation: demo-chat-bounce 1.2s infinite ease-in-out;
+}
+
+.demo-chat__typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.demo-chat__typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes demo-chat-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Media recommendation cards */
+.demo-chat__media {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  max-width: 85%;
+}
+
+.demo-chat__card {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  animation: demo-chat-fadein 0.4s ease;
+}
+
+.demo-chat__poster {
+  width: 36px;
+  height: 50px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+}
+
+.demo-chat__card:nth-child(1) .demo-chat__poster {
+  background: linear-gradient(135deg, #1a237e, #00838f);
+}
+
+.demo-chat__card:nth-child(2) .demo-chat__poster {
+  background: linear-gradient(135deg, #b71c1c, #e65100);
+}
+
+.demo-chat__card:nth-child(3) .demo-chat__poster {
+  background: linear-gradient(135deg, #e65100, #f57f17);
+}
+
+.demo-chat__card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.demo-chat__card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.demo-chat__card-meta {
+  font-size: 0.65rem;
+  color: #94a3b8;
+}
+
+.demo-chat__card-genres {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.demo-chat__genre {
+  font-size: 0.58rem;
+  padding: 0.1rem 0.35rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  border-radius: 4px;
+}

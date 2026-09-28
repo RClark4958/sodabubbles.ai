@@ -1,0 +1,50 @@
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-online .status-dot {
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e80;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.status-degraded .status-dot {
+  background: #eab308;
+  box-shadow: 0 0 6px #eab30880;
+}
+
+.status-offline .status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef444480;
+}
+
+.status-checking .status-dot {
+  background: #6b7280;
+  animation: pulse-gray 1.5s ease-in-out infinite;
+}
+
+.status-online .status-label { color: #22c55e; }
+.status-degraded .status-label { color: #eab308; }
+.status-offline .status-label { color: #ef4444; }
+.status-checking .status-label { color: #6b7280; }
+
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 6px #22c55e80; }
+  50% { box-shadow: 0 0 12px #22c55ecc, 0 0 20px #22c55e40; }
+}
+
+@keyframes pulse-gray {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}

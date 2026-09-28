@@ -1,0 +1,44 @@
+# Cloudflare Pages configuration template. Copy to wrangler.toml (gitignored) and fill in
+# the placeholders before running `npm run dev` or `npm run deploy`.
+#
+# Once this file exists, Wrangler treats it as the source of truth for the project's bindings and
+# vars: anything configured only in the dashboard is replaced on the next deploy.
+#
+# Deploy: `npm run deploy` (builds, then `wrangler pages deploy`). Auth comes from
+# CLOUDFLARE_API_TOKEN in the environment; no credentials belong in this file.
+
+name = "sodabubbles-landing-page"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-02-13"
+
+# Upstream origins read by functions/api/health and functions/api/chat.
+[vars]
+MYHIPPO_ORIGIN = "https://<myhippo-host>"
+MONEYBAGS_ORIGIN = "https://<moneybags-host>"
+ARR_MEDIA_AGENT_ORIGIN = "https://<arr-media-agent-host>"
+POKE_SAUCE_ORIGIN = "https://<poke-sauce-host>"
+THE_NEWS_ORIGIN = "https://<the-news-host>"
+MARATHON_LOADOUT_ORIGIN = "https://<marathon-loadout-host>"
+
+# Rate limiting for the /api/chat/[project] proxy.
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "<RATE_LIMIT_KV_NAMESPACE_ID>"
+
+# Secrets are not stored here. TURNSTILE_SECRET_KEY is an encrypted secret on the project:
+#   wrangler pages secret put TURNSTILE_SECRET_KEY
+# It survives deploys from this file because secrets are managed separately from bindings.
+
+# Preview deployments (any branch other than main). Pages environments do not inherit
+# top-level vars or bindings, so both are repeated.
+[env.preview.vars]
+MYHIPPO_ORIGIN = "https://<myhippo-host>"
+MONEYBAGS_ORIGIN = "https://<moneybags-host>"
+ARR_MEDIA_AGENT_ORIGIN = "https://<arr-media-agent-host>"
+POKE_SAUCE_ORIGIN = "https://<poke-sauce-host>"
+THE_NEWS_ORIGIN = "https://<the-news-host>"
+MARATHON_LOADOUT_ORIGIN = "https://<marathon-loadout-host>"
+
+[[env.preview.kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "<RATE_LIMIT_KV_NAMESPACE_ID>"

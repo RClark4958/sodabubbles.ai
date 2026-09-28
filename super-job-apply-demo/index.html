@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Job Apply — Audit Trail Demo</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #232633;
+      --border: #2d3148;
+      --text: #e4e4e7;
+      --text-dim: #8b8fa3;
+      --accent: #8b5cf6;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --magenta: #d946ef;
+      --cyan: #06b6d4;
+      --red: #ef4444;
+      --blue: #3b82f6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    header h1 span { color: var(--accent); }
+
+    header p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .job-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .job-header h2 { font-size: 1.2rem; margin-bottom: 0.25rem; }
+    .job-header .company { color: var(--cyan); font-weight: 500; }
+    .job-header .score { color: var(--green); font-weight: 600; font-size: 1.1rem; }
+    .job-header .meta { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.5rem; }
+
+    .pipeline {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .pipeline-step {
+      flex: 1;
+      min-width: 120px;
+      text-align: center;
+      padding: 0.75rem 0.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.8rem;
+    }
+
+    .pipeline-step:hover { border-color: var(--accent); }
+    .pipeline-step.active { border-color: var(--accent); background: var(--surface2); }
+    .pipeline-step .step-icon { font-size: 1.3rem; display: block; margin-bottom: 0.25rem; }
+    .pipeline-step .step-label { color: var(--text-dim); }
+    .pipeline-step.active .step-label { color: var(--text); }
+
+    .stage {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .stage.active { display: block; }
+
+    .stage-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .stage-header .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-writer { background: rgba(234, 179, 8, 0.15); color: var(--yellow); }
+    .badge-editor { background: rgba(217, 70, 239, 0.15); color: var(--magenta); }
+    .badge-mediator { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+    .badge-original { background: rgba(139, 143, 163, 0.15); color: var(--text-dim); }
+    .badge-score { background: rgba(6, 182, 212, 0.15); color: var(--cyan); }
+
+    .stage-body { padding: 1.5rem; }
+
+    .feedback {
+      background: var(--surface2);
+      border-left: 3px solid var(--accent);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      font-style: italic;
+    }
+
+    .changes {
+      margin-bottom: 1.25rem;
+    }
+
+    .changes h4 {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .change-item {
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 0.6rem 0.9rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      border-left: 2px solid var(--border);
+    }
+
+    .change-item.ai-tell { border-left-color: var(--magenta); }
+    .change-item.accuracy { border-left-color: var(--red); }
+    .change-item.restore { border-left-color: var(--green); }
+
+    .content-preview {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
+      color: var(--text-dim);
+    }
+
+    .content-preview .heading { color: var(--cyan); font-weight: 600; }
+    .content-preview .bullet { color: var(--text); }
+
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      padding: 0.6rem 1.2rem;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .pipeline { gap: 0.3rem; }
+      .pipeline-step { min-width: 80px; padding: 0.5rem 0.25rem; font-size: 0.7rem; }
+      .pipeline-step .step-icon { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🚀 <span>Super Job Apply</span> — Audit Trail</h1>
+      <p>Watch a resume get rewritten for a specific job through the Writer → Editor → Mediator pipeline. Every stage is logged for review. All personal details anonymized.</p>
+    </header>
+
+    <div class="job-header">
+      <div class="company">Acme Staffing</div>
+      <h2>Cloud Infrastructure Engineer — Remote</h2>
+      <div class="score">Match Score: 0.82 / 1.0 — STRONG APPLY</div>
+      <div class="meta">Requirements: Azure, Terraform, Kubernetes, CI/CD, Docker, Security Automation</div>
+    </div>
+
+    <div class="pipeline" id="pipeline">
+      <div class="pipeline-step active" data-stage="original">
+        <span class="step-icon">📄</span>
+        <span class="step-label">Original</span>
+      </div>
+      <div class="pipeline-step" data-stage="writer">
+        <span class="step-icon">✍️</span>
+        <span class="step-label">Writer</span>
+      </div>
+      <div class="pipeline-step" data-stage="editor">
+        <span class="step-icon">🔍</span>
+        <span class="step-label">Editor</span>
+      </div>
+      <div class="pipeline-step" data-stage="mediator">
+        <span class="step-icon">⚖️</span>
+        <span class="step-label">Mediator</span>
+      </div>
+      <div class="pipeline-step" data-stage="cover-letter">
+        <span class="step-icon">💌</span>
+        <span class="step-label">Cover Letter</span>
+      </div>
+    </div>
+
+    <!-- Original Resume -->
+    <div class="stage active" id="stage-original">
+      <div class="stage-header">
+        <span class="badge badge-original">Original Resume</span>
+        <span style="color: var(--text-dim); font-size: 0.85rem;">Base resume before any tailoring</span>
+      </div>
+      <div class="stage-body">
+        <div class="content-preview"><span class="heading">## Summary</span>
+AI/ML Engineer with 4+ years building production AI systems on Databricks.
+Co-chaired the Databricks Center of Excellence. Shipped enterprise RAG
+applications, autonomous coding agents, LangChain-based actuarial tools,
+and MLOps pipelines — all on Databricks' native stack. Earlier career in
+DevOps/platform engineering: Kubernetes, Terraform, CI/CD, and Azure
+infrastructure. Background in medicine (MD) and neuroscience research.
+
+<span class="heading">## Experience</span>
+
+<span class="heading">### AI/ML Engineer (2026–Present)</span>
+<span class="bullet">- Designed and deployed production AI agents using LangGraph, LangChain, and MLflow</span>
+<span class="bullet">- Built an enterprise RAG system with Vector Search for citation-backed documentation answers across 14,000+ pages</span>
+<span class="bullet">- Architected data quality platforms on the Lakehouse, implementing a 12-rule trust scoring framework</span>
+<span class="bullet">- Built an automated coding agent integrating Aider + Claude Opus</span>
+
+<span class="heading">### Analytics Engineer-Senior (2025–2026)</span>
+<span class="bullet">- Co-Chaired the Center of Excellence, setting engineering standards</span>
+<span class="bullet">- Implemented Asset Bundle management with GitHub Actions CI/CD</span>
+<span class="bullet">- Designed a CI/CD-driven MLOps pipeline automating model registry, versioning, testing</span>
+
+<span class="heading">### Software Engineer (2022–2025)</span>
+<span class="bullet">- Bootstrapped Azure Kubernetes clusters with Terraform and ArgoCD</span>
+<span class="bullet">- Designed Azure Service Bus namespace/queue via Terraform with private endpoints</span>
+<span class="bullet">- Built centralized GitHub Actions deployment workflows for IIS</span>
+<span class="bullet">- Automated Snyk repository onboarding with a Kubernetes cron job</span>
+<span class="bullet">- Automated compute scheduling, saving $7k/month</span></div>
+      </div>
+    </div>
+
+    <!-- Writer Draft -->
+    <div class="stage" id="stage-writer">
+      <div class="stage-header">
+        <span class="badge badge-writer">Writer Agent</span>
+        <span style="color: var(--text-dim); font-size: 0.85rem;">Rewrites for Azure Cloud Engineer keywords</span>
+      </div>
+      <div class="stage-body">
+        <div class="feedback">"Repositioned as 'Azure Cloud Engineer' to match the posting. Moved Azure/Terraform/K8s experience to the top. Mirrored job posting language: 'IaC,' 'container orchestration,' 'security automation.' Kept AI/ML background but framed it as cloud-deployed workloads."</div>
+        <div class="content-preview"><span class="heading">## Summary</span>
+Azure Cloud Engineer with 4+ years designing and deploying cloud
+infrastructure, automation pipelines, and platform services on Microsoft
+Azure. Built production Kubernetes clusters, implemented IaC with
+Terraform, and designed CI/CD workflows that align cloud infrastructure
+with business objectives. Collaborates cross-functionally with development,
+operations, and security teams.
+
+<span class="heading">### AI/ML Engineer (2026–Present)</span>
+<span class="bullet">- Deployed production AI agents on Azure-hosted infrastructure using LangGraph and MLflow</span>
+<span class="bullet">- Architected enterprise RAG system with vector search and semantic retrieval</span>
+<span class="bullet">- Designed and implemented a data quality platform with a 12-rule trust scoring framework</span>
+<span class="bullet">- Owned the design and deployment of an autonomous coding agent</span>
+
+<span class="heading">### Analytics Engineer-Senior (2025–2026)</span>
+<span class="bullet">- Architected CI/CD-driven MLOps pipeline automating model registry and versioning</span>
+<span class="bullet">- Implemented Asset Bundle management optimizing workflow deployments via GitHub Actions</span>
+<span class="bullet">- Deployed actuarial trends agent to production using MLflow and Mosaic AI</span>
+
+<span class="heading">### Software Engineer (2022–2025)</span>
+<span class="bullet">- Bootstrapped Azure Kubernetes clusters with Terraform and ArgoCD for one-click deployment</span>
+<span class="bullet">- Designed Azure Service Bus with private endpoints for secure cross-system messaging</span>
+<span class="bullet">- Built centralized GitHub Actions workflows, eliminating secret sprawl across 10+ repos</span>
+<span class="bullet">- Automated Snyk vulnerability scanning via Kubernetes cron job</span>
+<span class="bullet">- Reduced compute costs by $7k/month through automated resource scheduling</span></div>
+      </div>
+    </div>
+
+    <!-- Editor Review -->
+    <div class="stage" id="stage-editor">
+      <div class="stage-header">
+        <span class="badge badge-editor">Editor Agent</span>
+        <span style="color: var(--text-dim); font-size: 0.85rem;">22 corrections — accuracy, AI tells, tone</span>
+      </div>
+      <div class="stage-body">
+        <div class="feedback">"The draft was well-structured but had several AI tells: nearly every bullet opened with a strong action verb, sentence structures were unnaturally parallel, and the summary read like a LinkedIn optimization exercise rather than a real person writing about themselves."</div>
+        <div class="changes">
+          <h4>AI Tells Fixed</h4>
+          <div class="change-item ai-tell">Rewrote summary to sound conversational — removed corporate filler like "aligns cloud infrastructure with business objectives"</div>
+          <div class="change-item ai-tell">Varied bullet openings throughout — not every line starts with a power verb now</div>
+          <div class="change-item ai-tell">Removed "collaborates cross-functionally with development, operations, and security teams" — reads like a LinkedIn headline generator</div>
+        </div>
+        <div class="changes">
+          <h4>Accuracy Flags</h4>
+          <div class="change-item accuracy">Removed LangChain actuarial agent bullet from Analytics Engineer role — present in draft but not verifiable from original resume</div>
+          <div class="change-item accuracy">Removed "Deployed actuarial trends agent to production" bullet — not present in the candidate's provided experience summary</div>
+          <div class="change-item accuracy">Tightened the RAG bullet to include the specific technical details from the original (semantic chunking, reranking) that the draft omitted</div>
+        </div>
+        <div class="changes">
+          <h4>Other Changes</h4>
+          <div class="change-item">Changed title from "Azure Cloud Engineer" to "Cloud Engineer" to match target role description</div>
+          <div class="change-item">Added MD credential as a human-interest detail that differentiates the candidate</div>
+          <div class="change-item">Moved $7k/month cost savings bullet to lead the Software Engineer section — strongest proof of impact</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mediator Final -->
+    <div class="stage" id="stage-mediator">
+      <div class="stage-header">
+        <span class="badge badge-mediator">Mediator Agent</span>
+        <span style="color: var(--text-dim); font-size: 0.85rem;">Resolved 2 conflicts, restored 2 bullets</span>
+      </div>
+      <div class="stage-body">
+        <div class="feedback">"The Editor's accuracy flag on the LangChain actuarial agent and MLflow deployment bullets was reversed — both bullets ARE present in the candidate's original resume, so Rule 1 (accuracy flags always win) requires restoring them. They were lightly tightened for tone without adding new claims."</div>
+        <div class="changes">
+          <h4>Conflict Resolutions</h4>
+          <div class="change-item restore">Restored LangChain actuarial agent bullet — the Editor incorrectly flagged it as fabricated, but it exists in the original resume. Lightly shortened for tone.</div>
+          <div class="change-item restore">Restored MLflow/Mosaic AI deployment bullet — same issue; Editor was wrong, original resume confirms it. Tightened phrasing.</div>
+          <div class="change-item">Merged RAG bullet: kept the Editor's readable structure but restored specific technical details (embedding model name, semantic chunking, reranking) from the original</div>
+          <div class="change-item">Kept "Azure-hosted" qualifier on MLOps pipeline bullet from Writer — plausible given full Azure context across the resume</div>
+        </div>
+        <div class="content-preview" style="margin-top: 1rem;"><span class="heading">## Summary</span>
+Cloud Engineer with 4+ years building and operating Azure infrastructure,
+Kubernetes platforms, and CI/CD pipelines. Hands-on with Terraform, AKS,
+GitHub Actions, and security tooling. More recent work focused on deploying
+AI/ML workloads to cloud — RAG systems, LLM agents, and MLOps pipelines
+running on managed infrastructure. MD background adds unusual clarity when
+explaining complex systems to non-technical stakeholders.
+
+<span class="heading">### Software Engineer (2022–2025)</span>
+<span class="bullet">- Cut compute costs by $7k/month through automated resource scheduling</span>
+<span class="bullet">- Bootstrapped Azure Kubernetes clusters with Terraform and ArgoCD</span>
+<span class="bullet">- Built centralized GitHub Actions deployment workflows for IIS</span>
+<span class="bullet">- Designed Azure Service Bus with private endpoints for secure messaging</span>
+<span class="bullet">- Automated Snyk vulnerability scanning onboarding via K8s cron job</span>
+<span class="bullet">- Created a custom Conda channel in Azure Blob Storage for dependency management</span></div>
+      </div>
+    </div>
+
+    <!-- Cover Letter -->
+    <div class="stage" id="stage-cover-letter">
+      <div class="stage-header">
+        <span class="badge badge-writer">Writer</span>
+        <span style="margin: 0 0.25rem; color: var(--text-dim);">→</span>
+        <span class="badge badge-editor">Editor</span>
+        <span style="margin: 0 0.25rem; color: var(--text-dim);">→</span>
+        <span class="badge badge-mediator">Final</span>
+      </div>
+      <div class="stage-body">
+        <div class="tabs">
+          <div class="tab active" data-tab="cl-writer">Writer Draft</div>
+          <div class="tab" data-tab="cl-editor">Editor Review</div>
+          <div class="tab" data-tab="cl-final">Final Version</div>
+        </div>
+        <div class="tab-content active" id="tab-cl-writer" style="padding-top: 1rem;">
+          <div class="content-preview">Building scalable Azure infrastructure that actually holds up
+under enterprise workloads is exactly the kind of problem I've
+spent the last four years solving — and the reason this role
+caught my attention.
+
+At my current company, I bootstrapped Azure Kubernetes clusters
+from scratch using Terraform and ArgoCD, built centralized CI/CD
+workflows that eliminated secret sprawl across application repos,
+and automated Snyk vulnerability scanning across every new
+repository. I've been spending time deploying AI/ML workloads to
+Azure — RAG applications and LLM-based agents that needed real
+infrastructure discipline to run reliably.
+
+I'm genuinely excited about the chance to go deep on Azure
+infrastructure at this scale.</div>
+        </div>
+        <div class="tab-content" id="tab-cl-editor" style="padding-top: 1rem;">
+          <div class="feedback">"Mostly human-sounding already. Main fixes: removed filler words ('actually,' 'genuinely'), one overlong opener, and a weak closing that leaned on 'genuinely excited' without adding anything specific."</div>
+          <div class="changes">
+            <h4>AI Tells Fixed</h4>
+            <div class="change-item ai-tell">"actually holds up" → "holds up" — 'actually' is hedge filler that shows up constantly in AI-softened writing</div>
+            <div class="change-item ai-tell">"the last four years" → "years" — avoids the over-precision that feels resume-rehearsed</div>
+            <div class="change-item ai-tell">"I'm genuinely excited about the chance to go deep" → "I'm looking forward to going deep" — removes self-assessed enthusiasm</div>
+          </div>
+        </div>
+        <div class="tab-content" id="tab-cl-final" style="padding-top: 1rem;">
+          <div class="feedback">"The Editor's version was cleaner in almost every meaningful way. Preserved the Editor's full text without modification because it already passed the read-it-aloud test. Flagged the absence of company-specific detail in the rationale — neither agent researched the company, so no detail was invented."</div>
+          <div class="content-preview">Building scalable Azure infrastructure that holds up under real
+enterprise workloads is exactly the kind of problem I've spent
+years solving — and why this role stood out.
+
+At my current company, I bootstrapped Azure Kubernetes clusters
+from scratch using Terraform and ArgoCD, built centralized CI/CD
+workflows that eliminated secret sprawl across application repos,
+and automated vulnerability scanning across every new repository.
+From there, my work shifted toward deploying AI/ML workloads to
+Azure — RAG applications and LLM-based agents that needed real
+infrastructure discipline to run reliably.
+
+The $7k/month I saved through automated resource scheduling came
+from understanding cloud costs at the infrastructure level —
+without touching a single application, just smarter infrastructure.
+I'm looking forward to going deep on Azure at this scale.</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        Generated by <a href="https://github.com/RClark4958/super-job-apply">Super Job Apply</a> —
+        Writer → Editor → Mediator pipeline.
+        All personal details anonymized for this demo.
+      </p>
+      <p style="margin-top: 0.5rem;">
+        <a href="https://sodabubbles.ai">← Back to sodabubbles.ai</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // Pipeline step navigation
+    document.getElementById('pipeline').addEventListener('click', (e) => {
+      const step = e.target.closest('.pipeline-step');
+      if (!step) return;
+
+      const stageId = step.dataset.stage;
+
+      document.querySelectorAll('.pipeline-step').forEach(s => s.classList.remove('active'));
+      step.classList.add('active');
+
+      document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+      document.getElementById('stage-' + stageId).classList.add('active');
+    });
+
+    // Cover letter tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabId = tab.dataset.tab;
+        tab.closest('.stage-body').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        tab.closest('.stage-body').querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

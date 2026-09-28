@@ -1,0 +1,31 @@
+.placeholder-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  min-height: 200px;
+}
+
+.placeholder-card__icon {
+  font-size: 2.5rem;
+  opacity: 0.5;
+}
+
+.placeholder-card__name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.placeholder-card__tagline {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #374151;
+}
